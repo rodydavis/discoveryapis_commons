@@ -31,9 +31,10 @@ class ApiRequester {
   final String _rootUrl;
   final String _basePath;
   final String _userAgent;
+  final Map<String, String> extraHeaders;
 
-  ApiRequester(
-      this._httpClient, this._rootUrl, this._basePath, this._userAgent) {
+  ApiRequester(this._httpClient, this._rootUrl, this._basePath, this._userAgent,
+      {this.extraHeaders}) {
     assert(_rootUrl.endsWith('/'));
   }
 
@@ -189,6 +190,9 @@ class ApiRequester {
         'content-type': uploadMedia.contentType,
         'content-length': '${uploadMedia.length}'
       });
+      if (extraHeaders != null) {
+        request.headers.addAll(extraHeaders);
+      }
       return _httpClient.send(request);
     }
 
@@ -223,7 +227,9 @@ class ApiRequester {
       // If we don't do this, the browser will complain that we're attempting
       // to set a header that we're not allowed to set.
       headers.removeWhere((key, value) => _forbiddenHeaders.contains(key));
-
+      if (extraHeaders != null) {
+        headers.addAll(extraHeaders);
+      }
       var request = _RequestImpl(method, uri, bodyController.stream);
       request.headers.addAll(headers);
       return _httpClient.send(request);
